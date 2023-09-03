@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Obliczanie pochodnej</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.0/katex.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .calculator {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .calculator h1 {
+            margin-bottom: 20px;
+        }
+
+        .input-container {
+            margin-bottom: 20px;
+        }
+
+        .input-container label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .input-container input {
+            padding: 10px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .custom-button {
+            background-color: #fbeee0;
+            border: 2px solid #422800;
+            border-radius: 30px;
+            box-shadow: #422800 4px 4px 0 0;
+            color: #422800;
+            cursor: pointer;
+            display: inline-block;
+            font-weight: 600;
+            font-size: 18px;
+            padding: 0 18px;
+            line-height: 50px;
+            text-align: center;
+            text-decoration: none;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            margin: 5px;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        .custom-button:hover {
+            background-color: #fff;
+        }
+
+        .custom-button:active {
+            box-shadow: #422800 2px 2px 0 0;
+            transform: translate(2px, 2px);
+        }
+
+        .calculate-button {
+            min-width: 120px;
+            padding: 0 25px;
+        }
+
+        @media (min-width: 768px) {
+            .custom-button {
+                min-width: 120px;
+                padding: 0 25px;
+            }
+        }
+
+        .result {
+            font-size: 20px;
+            text-align: center;
+        }
+
+        .result-label {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .result-equation {
+            font-size: 18px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>Kalkulator Pochodnej</h1>
+        <div class="input-container">
+            <label>Wprowadź wyrażenie matematyczne:</label>
+            <input type="text" id="expression" value="cos(x)/sqrt(loge(x))">
+        </div>
+        <div class="input-container">
+            <label>Wprowadź zmienną, względem której obliczyć pochodną:</label>
+            <input type="text" id="variable" value="x">
+        </div>
+
+
+        <div class="button-container">
+            <button class="custom-button" onclick="insertSymbol('sqrt')">√</button>
+            <button class="custom-button" onclick="insertSymbol('**')">^</button>
+            <button class="custom-button" onclick="insertSymbol('/')">/</button>
+            <button class="custom-button" onclick="insertSymbol('*')">*</button>
+            <button class="custom-button" onclick="insertSymbol('+')">+</button>
+            <button class="custom-button" onclick="insertSymbol('-')">-</button>
+            <button class="custom-button" onclick="insertSymbol('pi')">π</button>
+            <button class="custom-button" onclick="insertSymbol('E')">e</button>
+            <button class="custom-button" onclick="insertSymbol('sin')">sin</button>
+            <button class="custom-button" onclick="insertSymbol('cos')">cos</button>
+            <button class="custom-button" onclick="insertSymbol('tan')">tan</button>
+            <button class="custom-button" onclick="insertSymbol('asin')">asin</button>
+            <button class="custom-button" onclick="insertSymbol('acos')">acos</button>
+            <button class="custom-button" onclick="insertSymbol('atan')">atan</button>
+            <button class="custom-button" onclick="insertSymbol('loge')">loge</button>
+        </div>
+        <button class="custom-button calculate-button" onclick="calculate()">Oblicz pochodną</button>
+
+
+
+        <div class="result">
+            <div class="result-label">Wynik:</div>
+            <div class="result-equation" id="result"></div>
+        </div>
+
+
+
+        <div class="hints">
+            <h2>Wskazówki:</h2>
+            <ul>
+                <li><strong>loge(x)</strong> - naturalny logarytm z x</li>
+                <li><strong>sqrt(x)</strong> - pierwiastek kwadratowy z x</li>
+                <li><strong>cos(x)</strong> - cosinus x</li>
+                <li><strong>sin(x)</strong> - sinus x</li>
+                <li>I tak dalej...</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.0.1/math.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.0/katex.min.js"></script>
+
+    
+    <script>
+        function insertSymbol(symbol) {
+            document.getElementById('expression').value += symbol;
+        }
+
+        function calculate() {
+            const expressionStr = document.getElementById('expression').value;
+            const variableStr = document.getElementById('variable').value;
+
+            try {
+                const correctedExpressionStr = expressionStr.replace(/loge\(([^)]+)\)/g, 'log($1)');
+                const expression = math.parse(correctedExpressionStr);
+                const variable = variableStr;
+
+                const derivative = math.derivative(expression, variable);
+                const prettyDerivative = katex.renderToString(derivative.toString(), { throwOnError: false, displayMode: true });
+
+                const resultElement = document.getElementById('result');
+                resultElement.innerHTML = `
+                    <div class="result-equation">${prettyDerivative}</div>
+                `;
+            } catch (error) {
+                const resultElement = document.getElementById('result');
+                resultElement.innerHTML = `
+                    <div class="result-equation">Błąd: Nie można obliczyć pochodnej</div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
